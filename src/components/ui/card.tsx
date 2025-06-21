@@ -1,80 +1,110 @@
-import React from 'react';
-import {
-    Box,
-    Heading,
-    Text,
-    VStack,
-    HStack,
-    type BoxProps,
-} from '@chakra-ui/react';
+"use client"
+
+import { Box, type BoxProps, Text, VStack, HStack, Heading } from "@chakra-ui/react"
+import { forwardRef } from "react"
 
 export interface CardProps extends BoxProps {
-    header?: React.ReactNode;
-    body?: React.ReactNode;
-    footer?: React.ReactNode;
-    headerTitle?: string;
-    headerSubtitle?: string;
-    bodyText?: string;
-    footerText?: string;
-    children?: React.ReactNode;
+    variant?: "elevated" | "outline"
+    // Convenient props for common use cases
+    title?: string
+    subtitle?: string
+    content?: string
+    footer?: string
+    // Layout props
+    showHeader?: boolean
+    showFooter?: boolean
+    // Action props
+    actions?: React.ReactNode
+    // Content override
+    children?: React.ReactNode
 }
 
-export function Card({
-    header,
-    body,
-    footer,
-    headerTitle,
-    headerSubtitle,
-    bodyText,
-    footerText,
-    children,
-    bg = 'white',
-    shadow = 'md',
-    borderRadius = 'lg',
-    p = 0,
-    ...props
-}: CardProps) {
-    return (
-        <Box
-            bg={bg}
-            shadow={shadow}
-            borderRadius={borderRadius}
-            overflow="hidden"
-            {...props}
-        >
-            {/* Header */}
-            {(header || headerTitle || headerSubtitle) && (
-                <Box p={6} pb={headerSubtitle ? 4 : 6} borderBottom="1px" borderColor="gray.200">
-                    {header || (
-                        <VStack align="start" gap={2}>
-                            {headerTitle && (
-                                <Heading size="md">
-                                    {headerTitle}
+export const Card = forwardRef<HTMLDivElement, CardProps>(
+    ({
+        variant = "elevated",
+        title,
+        subtitle,
+        content,
+        footer,
+        showHeader = false,
+        showFooter = false,
+        actions,
+        children,
+        ...props
+    }, ref) => {
+        const baseStyles = {
+            bg: "surface-elevated",
+            borderRadius: "lg",
+            border: "1px solid",
+            borderColor: "border",
+            overflow: "hidden",
+        }
+
+        const variantStyles = {
+            elevated: {
+                boxShadow: "md",
+            },
+            outline: {
+                borderColor: "border",
+            },
+        }
+
+        // Determine if we should show header/footer based on props
+        const shouldShowHeader = showHeader || title || subtitle
+        const shouldShowFooter = showFooter || footer || actions
+
+        return (
+            <Box
+                ref={ref}
+                {...baseStyles}
+                {...variantStyles[variant]}
+                {...props}
+            >
+                {/* Header Section */}
+                {shouldShowHeader && (
+                    <Box p="lg" pb={subtitle ? "sm" : "lg"} borderBottom="1px" borderColor="border">
+                        <VStack align="start" gap="sm">
+                            {title && (
+                                <Heading size="md" color="text-primary">
+                                    {title}
                                 </Heading>
                             )}
-                            {headerSubtitle && (
-                                <Text fontSize="sm" color="gray.500">
-                                    {headerSubtitle}
+                            {subtitle && (
+                                <Text fontSize="sm" color="text-secondary">
+                                    {subtitle}
                                 </Text>
                             )}
                         </VStack>
-                    )}
-                </Box>
-            )}
+                    </Box>
+                )}
 
-            {/* Body */}
-            {(body || bodyText || children) && (
-                <Box p={6}>
-                    {children || body || (bodyText && <Text>{bodyText}</Text>)}
-                </Box>
-            )}
+                {/* Body Section */}
+                {(children || content) && (
+                    <Box p="lg">
+                        {children || (content && <Text color="text-primary">{content}</Text>)}
+                    </Box>
+                )}
 
-            {/* Footer */}
-            {(footer || footerText) && (
-                <Box p={6} pt={4} borderTop="1px" borderColor="gray.200">
-                    {footer || (footerText && <Text fontSize="sm">{footerText}</Text>)}
-                </Box>
-            )}
-        </Box>
-    );
-} 
+                {/* Footer Section */}
+                {shouldShowFooter && (
+                    <Box p="lg" pt="md" borderTop="1px" borderColor="border">
+                        <HStack justify="space-between" align="center">
+                            {footer && (
+                                <Text fontSize="sm" color="text-secondary">
+                                    {footer}
+                                </Text>
+                            )}
+                            {actions && (
+                                <HStack gap="sm">
+                                    {actions}
+                                </HStack>
+                            )}
+                        </HStack>
+                    </Box>
+                )}
+            </Box>
+        )
+    }
+)
+
+Card.displayName = "Card" 
