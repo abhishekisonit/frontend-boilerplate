@@ -1,80 +1,59 @@
-import React from 'react';
-import {
-    Box,
-    Heading,
-    Text,
-    VStack,
-    HStack,
-    type BoxProps,
-} from '@chakra-ui/react';
+import { Box, type BoxProps } from '@chakra-ui/react'
+import styles from './Card.module.css'
 
-export interface CardProps extends BoxProps {
-    header?: React.ReactNode;
-    body?: React.ReactNode;
-    footer?: React.ReactNode;
-    headerTitle?: string;
-    headerSubtitle?: string;
-    bodyText?: string;
-    footerText?: string;
-    children?: React.ReactNode;
+interface CardProps extends Omit<BoxProps, 'variant'> {
+    variant?: 'elevated' | 'outline' | 'ghost'
+    title?: string
+    subtitle?: string
+    content?: string
+    footer?: string
+    children?: React.ReactNode
+    onClick?: () => void
 }
 
 export function Card({
-    header,
-    body,
+    variant = 'elevated',
+    title,
+    subtitle,
+    content,
     footer,
-    headerTitle,
-    headerSubtitle,
-    bodyText,
-    footerText,
     children,
-    bg = 'white',
-    shadow = 'md',
-    borderRadius = 'lg',
-    p = 0,
+    onClick,
+    className,
     ...props
 }: CardProps) {
+    const cardClass = [
+        styles.card,
+        styles[variant],
+        onClick && styles.clickable,
+        className
+    ].filter(Boolean).join(' ')
+
     return (
         <Box
-            bg={bg}
-            shadow={shadow}
-            borderRadius={borderRadius}
-            overflow="hidden"
+            className={cardClass}
+            onClick={onClick}
+            cursor={onClick ? 'pointer' : undefined}
             {...props}
         >
-            {/* Header */}
-            {(header || headerTitle || headerSubtitle) && (
-                <Box p={6} pb={headerSubtitle ? 4 : 6} borderBottom="1px" borderColor="gray.200">
-                    {header || (
-                        <VStack align="start" gap={2}>
-                            {headerTitle && (
-                                <Heading size="md">
-                                    {headerTitle}
-                                </Heading>
-                            )}
-                            {headerSubtitle && (
-                                <Text fontSize="sm" color="gray.500">
-                                    {headerSubtitle}
-                                </Text>
-                            )}
-                        </VStack>
-                    )}
+            {(title || subtitle) && (
+                <Box className={styles.header}>
+                    {title && <Box as="h3" className={styles.title}>{title}</Box>}
+                    {subtitle && <Box as="p" className={styles.subtitle}>{subtitle}</Box>}
                 </Box>
             )}
 
-            {/* Body */}
-            {(body || bodyText || children) && (
-                <Box p={6}>
-                    {children || body || (bodyText && <Text>{bodyText}</Text>)}
+            {(children || content) && (
+                <Box className={styles.body}>
+                    {children || <Box as="p" className={styles.content}>{content}</Box>}
                 </Box>
             )}
 
-            {/* Footer */}
-            {(footer || footerText) && (
-                <Box p={6} pt={4} borderTop="1px" borderColor="gray.200">
-                    {footer || (footerText && <Text fontSize="sm">{footerText}</Text>)}
+            {footer && (
+                <Box className={styles.footer}>
+                    <Box as="p" className={styles.footerText}>{footer}</Box>
                 </Box>
             )}
         </Box>
-    );
+    )
 } 
