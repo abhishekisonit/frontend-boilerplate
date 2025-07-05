@@ -11,6 +11,8 @@ A modern Next.js app with a **Notion-inspired design system** using **Chakra UI 
 - **Responsive**: Mobile-first design
 - **Accessible**: Chakra's built-in accessibility features
 - **Flexible**: Use Chakra's props + our custom styling
+- **Database Integration**: PostgreSQL with Prisma ORM
+- **Authentication**: NextAuth.js ready
 
 ## 🎨 Design System
 
@@ -43,6 +45,56 @@ npm install
 # Start development server
 npm run dev
 ```
+
+## 🔄 Daily Development Workflow
+
+### **After Computer Restart / Starting Fresh**
+
+1. **Start the Database**
+   ```bash
+   cd frontend-boilerplate
+   docker-compose up -d
+   ```
+
+2. **Verify Database is Running**
+   ```bash
+   docker-compose ps
+   ```
+   You should see `postgres_db` with status "Up" and "(healthy)".
+
+3. **Start Your Next.js App**
+   ```bash
+   npm run dev
+   ```
+
+4. **Test Everything is Working**
+   Visit: `http://localhost:3000/api/test-db`
+   
+   You should get:
+   ```json
+   {
+     "success": true,
+     "message": "Database connection successful",
+     "data": { ... }
+   }
+   ```
+
+### **Daily Workflow Summary**
+```bash
+# Start development
+docker-compose up -d    # Start database
+npm run dev            # Start Next.js app
+
+# When done for the day
+docker-compose down    # Stop database (optional - saves resources)
+```
+
+### **Troubleshooting**
+- **Database not starting?** → `docker-compose down && docker-compose up -d`
+- **Need to check database status?** → `docker logs postgres_db`
+- **Port conflicts?** → Check if local PostgreSQL is running on port 5432
+
+**Note:** Your database data persists between restarts, so you don't lose anything!
 
 ## 📁 Project Structure
 

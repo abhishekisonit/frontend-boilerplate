@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../styles/globals.css";
 import { Provider } from "@/components/ui/provider"
+import { AuthProvider } from "@/providers/AuthProvider"
 import { Header, Footer } from "@/components/ui"
 import { Box } from "@chakra-ui/react"
 
@@ -29,13 +30,15 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable}`} style={{ fontFamily: 'var(--font-family-sans)' }}>
         <Provider>
-          <Box minH="100vh" display="flex" flexDirection="column">
-            <Header />
-            <Box flex="1">
-              {children}
+          <AuthProvider>
+            <Box minH="100vh" display="flex" flexDirection="column">
+              <Header />
+              <Box flex="1">
+                {children}
+              </Box>
+              <Footer />
             </Box>
-            <Footer />
-          </Box>
+          </AuthProvider>
         </Provider>
       </body>
     </html>
