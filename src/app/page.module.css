@@ -166,3 +166,123 @@ a.secondary {
     filter: invert();
   }
 }
+
+/* Page Container */
+.container {
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  padding: 24px;
+}
+
+/* Showcase Card */
+.showcaseCard {
+  padding: 32px;
+}
+
+.showcaseContent {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+/* Button Grid */
+.buttonGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Input Group */
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 400px;
+}
+
+/* Color Palette */
+.colorPalette {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.colorRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.colorSwatch {
+  width: 64px;
+  height: 40px;
+  border-radius: 6px;
+}
+
+.colorLabel {
+  font-size: 14px;
+  color: #6b7280;
+  align-self: center;
+}
+
+/* Color Swatches */
+.primaryBlue {
+  background-color: #2563eb;
+}
+
+.primaryBlueLight {
+  background-color: #3b82f6;
+}
+
+.primaryBlueLighter {
+  background-color: #60a5fa;
+}
+
+.successGreen {
+  background-color: #10b981;
+}
+
+.warningYellow {
+  background-color: #f59e0b;
+}
+
+.dangerRed {
+  background-color: #ef4444;
+}
+
+/* Spacing Scale */
+.spacingScale {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.spacingBox {
+  background-color: #2563eb;
+  border-radius: 2px;
+}
+
+.spacing4 {
+  width: 16px;
+  height: 16px;
+}
+
+.spacing8 {
+  width: 32px;
+  height: 32px;
+}
+
+.spacing16 {
+  width: 64px;
+  height: 64px;
+}
+
+.spacing24 {
+  width: 96px;
+  height: 96px;
+}
+
+.spacingLabel {
+  font-size: 14px;
+  color: #6b7280;
+}
