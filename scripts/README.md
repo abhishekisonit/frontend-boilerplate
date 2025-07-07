@@ -61,6 +61,7 @@ DATABASE_URL="postgresql://postgres:prisma@localhost:5433/postgres?schema=public
 ### `.env.docker` (for Prisma commands)
 ```
 DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public"
+
 ```
 
 ## Development Workflow
@@ -101,6 +102,7 @@ DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=publ
 
 2. **Port conflicts:**
    ```bash
+
    # Check what's using port 5433
    netstat -ano | findstr :5433
    ```
@@ -134,6 +136,7 @@ npm run db:setup --verbose
 ```
 
 - **Next.js App**: Connects via `localhost:5433` (host-to-container)
+
 - **Prisma CLI**: Connects via `postgres_db:5432` (container-to-container)
 - **Database**: Runs in Docker container with persistent volume
 

@@ -92,11 +92,9 @@ class DatabaseSetup {
 
         try {
             await this.runCommand('docker-compose up -d');
-            this.log('PostgreSQL container started successfully.', 'success');
 
             // Wait for containers to be properly running
             await this.waitForContainersToBeReady();
-
         } catch (error) {
             throw new Error('Failed to start PostgreSQL container');
         }
@@ -165,6 +163,7 @@ class DatabaseSetup {
     }
 
     private async updateEnvFile(): Promise<void> {
+
         const dockerEnvContent = 'DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public"';
         const appEnvContent = 'DATABASE_URL="postgresql://postgres:prisma@localhost:5433/postgres?schema=public"';
 
