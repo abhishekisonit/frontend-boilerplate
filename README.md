@@ -92,7 +92,7 @@ docker-compose down    # Stop database (optional - saves resources)
 ### **Troubleshooting**
 - **Database not starting?** → `docker-compose down && docker-compose up -d`
 - **Need to check database status?** → `docker logs postgres_db`
-- **Port conflicts?** → Check if local PostgreSQL is running on port 5432
+- **Port conflicts?** → Check if local PostgreSQL is running on port 5433
 
 **Note:** Your database data persists between restarts, so you don't lose anything!
 
