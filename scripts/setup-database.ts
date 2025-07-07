@@ -1,7 +1,7 @@
 #!/usr/bin/env tsx
 
 import { execSync } from 'child_process';
-import { existsSync, writeFileSync } from 'fs';
+import { existsSync, writeFileSync, renameSync } from 'fs';
 import { join } from 'path';
 
 interface SetupOptions {
@@ -93,8 +93,49 @@ class DatabaseSetup {
         try {
             await this.runCommand('docker-compose up -d');
             this.log('PostgreSQL container started successfully.', 'success');
+
+            // Wait for containers to be properly running
+            await this.waitForContainersToBeReady();
+
         } catch (error) {
             throw new Error('Failed to start PostgreSQL container');
+        }
+    }
+
+    private async waitForContainersToBeReady(): Promise<void> {
+        this.log('Waiting for containers to be ready...', 'info');
+
+        const maxAttempts = 30;
+        const delay = 2000; // 2 seconds
+
+        for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+                const psOutput = await this.runCommand('docker-compose ps');
+
+                // Check if postgres_db container is running and healthy
+                if (psOutput.includes('postgres_db') &&
+                    psOutput.includes('Up') &&
+                    (psOutput.includes('healthy') || psOutput.includes('(healthy)'))) {
+                    this.log(`Containers are ready! (attempt ${attempt}/${maxAttempts})`, 'success');
+                    return;
+                }
+
+                if (attempt === maxAttempts) {
+                    throw new Error('Containers failed to start properly within expected time');
+                }
+
+                if (this.options.verbose) {
+                    this.log(`Containers not ready yet... (attempt ${attempt}/${maxAttempts})`, 'warning');
+                    this.log(`Current status: ${psOutput.trim()}`, 'info');
+                }
+
+                await new Promise(resolve => setTimeout(resolve, delay));
+            } catch (error) {
+                if (attempt === maxAttempts) {
+                    throw new Error('Failed to check container status');
+                }
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
         }
     }
 
@@ -124,14 +165,19 @@ class DatabaseSetup {
     }
 
     private async updateEnvFile(): Promise<void> {
-        const dockerEnvContent = 'DATABASE_URL="postgresql://postgres:password@postgres_db:5432/postgres?schema=public"';
-        const appEnvContent = 'DATABASE_URL="postgresql://postgres:password@localhost:5432/postgres?schema=public"';
+        const dockerEnvContent = 'DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public"';
+        const appEnvContent = 'DATABASE_URL="postgresql://postgres:prisma@localhost:5433/postgres?schema=public"';
 
         // Create .env.docker for Prisma commands
         writeFileSync(join(this.projectRoot, '.env.docker'), dockerEnvContent);
 
-        // Update main .env for Next.js app
-        writeFileSync(this.envPath, appEnvContent);
+        // Only create .env if it doesn't exist (don't overwrite user's manual changes)
+        if (!existsSync(this.envPath)) {
+            writeFileSync(this.envPath, appEnvContent);
+            this.log('Created .env file for Next.js app.', 'success');
+        } else {
+            this.log('Using existing .env file (not overwriting).', 'info');
+        }
 
         this.log('Environment files updated.', 'success');
     }
@@ -140,12 +186,53 @@ class DatabaseSetup {
         this.log('Pushing Prisma schema to database...', 'info');
 
         try {
-            await this.runCommand(
-                'docker run --rm -it --network prisma-network -v ${PWD}:/app -w /app node:18 npx prisma db push',
-                { env: { DATABASE_URL: 'postgresql://postgres:password@postgres_db:5432/postgres?schema=public', NODE_ENV: 'development' } }
-            );
+            // Temporarily rename .env to avoid conflicts
+            const envPath = this.envPath;
+            const envBackupPath = envPath + '.backup';
+
+            if (existsSync(envPath)) {
+                renameSync(envPath, envBackupPath);
+                this.log('Temporarily moved .env to .env.backup', 'info');
+            }
+
+            const command = `docker run --rm --network prisma-network -e DATABASE_URL=postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public -v ${this.projectRoot}:/app -w /app node:18 npx prisma db push`;
+            const env = { NODE_ENV: 'development' as const };
+
+            if (this.options.verbose) {
+                this.log(`Running command: ${command}`, 'info');
+                this.log(`With environment: DATABASE_URL=postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public`, 'info');
+            }
+
+            const result = await this.runCommand(command, { env });
+
+            if (this.options.verbose) {
+                this.log(`Command output: ${result}`, 'info');
+            }
+
+            // Restore .env file
+            if (existsSync(envBackupPath)) {
+                renameSync(envBackupPath, envPath);
+                this.log('Restored .env file', 'info');
+            }
+
             this.log('Schema pushed successfully!', 'success');
-        } catch (error) {
+        } catch (error: any) {
+            // Restore .env file even if command failed
+            const envPath = this.envPath;
+            const envBackupPath = envPath + '.backup';
+            if (existsSync(envBackupPath)) {
+                try {
+                    renameSync(envBackupPath, envPath);
+                    this.log('Restored .env file after error', 'info');
+                } catch (restoreError) {
+                    this.log('Failed to restore .env file', 'warning');
+                }
+            }
+
+            this.log(`Push schema error: ${error.message}`, 'error');
+            if (this.options.verbose) {
+                this.log(`Full error: ${error}`, 'error');
+            }
             throw new Error('Failed to push schema to database');
         }
     }
@@ -218,7 +305,7 @@ class DatabaseSetup {
             this.log('✅ Database setup completed successfully!', 'success');
             this.log('📝 Next steps:', 'info');
             this.log('   1. Start your Next.js app: npm run dev', 'info');
-            this.log('   2. Your app will connect to localhost:5432', 'info');
+            this.log('   2. Your app will connect to localhost:5433', 'info');
             this.log('   3. For Prisma commands, use the Docker approach', 'info');
 
         } catch (error: any) {

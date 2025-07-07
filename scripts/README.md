@@ -55,12 +55,12 @@ The script automatically manages two environment files:
 
 ### `.env` (for Next.js app)
 ```
-DATABASE_URL="postgresql://postgres:password@localhost:5432/postgres?schema=public"
+DATABASE_URL="postgresql://postgres:prisma@localhost:5433/postgres?schema=public"
 ```
 
 ### `.env.docker` (for Prisma commands)
 ```
-DATABASE_URL="postgresql://postgres:password@postgres_db:5432/postgres?schema=public"
+DATABASE_URL="postgresql://postgres:prisma@postgres_db:5432/postgres?schema=public"
 ```
 
 ## Development Workflow
@@ -101,8 +101,8 @@ DATABASE_URL="postgresql://postgres:password@postgres_db:5432/postgres?schema=pu
 
 2. **Port conflicts:**
    ```bash
-   # Check what's using port 5432
-   netstat -ano | findstr :5432
+   # Check what's using port 5433
+   netstat -ano | findstr :5433
    ```
 
 3. **Permission issues:**
@@ -129,11 +129,11 @@ npm run db:setup --verbose
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Next.js App   │    │   Prisma CLI    │    │  PostgreSQL DB  │
 │                 │    │                 │    │                 │
-│ localhost:5432  │◄──►│ postgres_db:5432│◄──►│   Container     │
+│ localhost:5433  │◄──►│ postgres_db:5432│◄──►│   Container     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
-- **Next.js App**: Connects via `localhost:5432` (host-to-container)
+- **Next.js App**: Connects via `localhost:5433` (host-to-container)
 - **Prisma CLI**: Connects via `postgres_db:5432` (container-to-container)
 - **Database**: Runs in Docker container with persistent volume
 
